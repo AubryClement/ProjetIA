@@ -4,6 +4,7 @@
 % Note: Nos coups sont positifs allant de 1 à 4 selon le type de piece. Ceux de l'ennemi sont négatifs.
 
 verifPiece(Piece):-
+	Piece #\= 0,
 	Piece >= -4,
 	Piece =< 4.
 
@@ -12,9 +13,12 @@ verifPos(Position):-
 	Position =< 4.
 
 :- begin_tests(test_verif_piece_et_position).
-	test("test_piece_true", true):-verifPiece(-4), verifPiece(4).
+	test("test_piece_true", true):-verifPiece(-4).
+	test("test_piece_true2", true):-verifPiece(4).
 	test("test_piece_fail", fail):-verifPiece(5).
-	test("test_position_true", true):-verifPos(1), verifPos(4).
+	test("test_piece_zero", fail):-verifPiece(0).
+	test("test_position_true", true):-verifPos(1).
+	test("test_position_true2", true):-verifPos(4).
 	test("test_position_fail", fail):-verifPos(0).
 	test("test_position_fail2", fail):-verifPos(5).
 :- end_tests(test_verif_piece_et_position).
@@ -22,13 +26,15 @@ verifPos(Position):-
 % Dans le quaduplet on ne doit pas avoir un pion ennemi du meme type
 
 interdiction(_, []):-!.
-interdiction(_, [0|L]):-.
+interdiction(A, [0|C]):-
+	interdiction(A, C).
 interdiction(A, [B|C]):-
 	A #\= -B,
 	interdiction(A, C).
 
 :- begin_tests(test_interdiction).
-	test("test_interdiction_true", true):-interdiction(1, [16, 26, 18, 421, 2, 1]), interdiction(42, [42]).
+	test("test_interdiction_true", true):-interdiction(1, [16, 26, 18, 421, 2, 1]).
+	test("test_interdiction_true2", true):-interdiction(42, [42]).
 	test("test_interdiction_fail", fail):-interdiction(1, [0, 0, -1]).
 	test("test_interdiction_vide", true):-interdiction(1, []).
 :- end_tests(test_interdiction).
@@ -38,6 +44,8 @@ interdiction(A, [B|C]):-
 % Coup interdit : si l'adversaire a posé sa piece sur une case, impossible de remettre une piece de ce type sur ligne, colonne ou carré
 
 diffType([]):-!.
+diffType([0|L]):-
+	diffType(L).
 diffType([X|L]):-
 	verifPiece(X),
 	interdiction(X, L),
@@ -45,10 +53,47 @@ diffType([X|L]):-
 
 :- begin_tests(test_diffType).
 	test("test_diffType_true", true):-diffType([1, -2, 3, 4]).
+	test("test_diffType_true2", true):-diffType([1, 1, 2]).
 	test("test_diffType_fail", fail):-diffType([0, 1, -1]).
 	test("test_diffType_outOfBounds", fail):-diffType([-5, 0, 2, 1]).
 	test("test_diffType_vide", true):-diffType([]).
 :- end_tests(test_diffType).	
+
+
+% Idem mais ce coup si on verifie que chaque case est bien différentes l'un de l'autre, pour les cas gagnants notamment 
+
+interdictionAll(_, []):-!.
+interdictionAll(A, [B|C]):-
+	A #\= 0,
+	A #\= abs(B),
+	interdictionAll(A, C).
+
+:- begin_tests(test_interdictionAll).
+	test("test_interdictionAll_true2", true):-interdictionAll(42, [34]).
+	test("test_interdictionAll_fail", fail):-interdictionAll(1, [0, 0, -1]).
+	test("test_interdictionAll_fail2", fail):-interdictionAll(1, [16, 26, 18, 421, 2, 1]).
+	test("test_interdictionAll_vide", true):-interdictionAll(1, []).
+:- end_tests(test_interdictionAll).
+
+
+% On vérifie que toutes les pieces sont de types différents et sont bien compris dans les choix possibles
+% Coup interdit : si l'adversaire a posé sa piece sur une case, impossible de remettre une piece de ce type sur ligne, colonne ou carré
+
+diffTypeAll([]):-!.
+diffTypeAll([0|L]):-
+	diffTypeAll(L).
+diffTypeAll([X|L]):-
+	verifPiece(X),
+	interdictionAll(X, L),
+	diffTypeAll(L).
+
+:- begin_tests(test_diffTypeAll).
+	test("test_diffTypeAll_true", true):-diffTypeAll([1, -2, 3, 4]).
+	test("test_diffTypeAll_fail", fail):-diffTypeAll([0, 1, -1]).
+	test("test_diffTypeAll_fail2", fail):-diffTypeAll([1, 1, 2]).
+	test("test_diffTypeAll_outOfBounds", fail):-diffTypeAll([-5, 0, 2, 1]).
+	test("test_diffTypeAll_vide", true):-diffTypeAll([]).
+:- end_tests(test_diffTypeAll).	
 
 % Vérification de la grille, par ligne, colonne, et carré
 
@@ -76,7 +121,7 @@ coupGagnant([A, B, C, D]):-
 	B #\= 0,
 	C #\= 0,
 	D #\= 0,
-	diffType([A, B, C, D]).
+	diffTypeAll([A, B, C, D]).
 	
 	% Ligne
 coupGagnant([A1, B1, C1, D1, _, _, _, _, _, _, _, _, _, _, _, _]):-coupGagnant([A1, B1, C1, D1]).
@@ -98,11 +143,12 @@ coupGagnant([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):-coupGagnant([
 
 
 :- begin_tests(test_coupGagnant).
-	test("test_coupGagnant_true", [nondet,true]):-
-		coupGagnant([1, -2, 3, -4]), coupGagnant([1, 2, 3, 4]), coupGagnant([-4, -2, -1, -3]).
+	test("test_coupGagnant_true", [nondet,true]):-coupGagnant([1, -2, 3, -4]).
+	test("test_coupGagnant_true2", [nondet,true]):-coupGagnant([1, 2, 3, 4]).
+	test("test_coupGagnant_true3", [nondet,true]):-coupGagnant([-4, -2, -1, -3]).
 	test("test_coupGagnant_true_grille",[nondet,true]):-coupGagnant([1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).
 	test("test_coupGagnant_fail", fail):-coupGagnant([0, -1, 2, -3]).
-	test("test_coupGagnant_fail2", fail):-coupGagnant([-1, 1, 2, -4]).
+	test("test_coupGagnant_fail2", fail):-coupGagnant([1, 1, 2, -4]).
 	test("test_coupGagnant_false_grille", fail):-coupGagnant([1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).
 	test("test_coupGagnant_ouOfBounds", fail):-coupGagnant([-6, 2, 1, 5]).
 :- end_tests(test_coupGagnant).	
@@ -112,10 +158,26 @@ coupGagnant([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):-coupGagnant([
 % On va considérer ça comme un coup mauvais
 % Dans le cas où notre pion serait posé
 
-coupMauvais([0, B, C, D]):-diffType([0, B, C, D]).
-coupMauvais([A, 0, C, D]):-diffType([A, 0, C, D]).
-coupMauvais([A, B, 0, D]):-diffType([A, B, 0, D]).
-coupMauvais([A, B, C, 0]):-diffType([A, B, C, 0]).
+coupMauvais([0, B, C, D]):-
+	B #\= 0,
+	C #\= 0,
+	D #\= 0,
+	diffType([B, C, D]).
+coupMauvais([A, 0, C, D]):-
+	A #\= 0,
+	C #\= 0,
+	D #\= 0,
+	diffType([A, C, D]).
+coupMauvais([A, B, 0, D]):-
+	diffType([A, B, D]),
+	A #\= 0,
+	B #\= 0,
+	D #\= 0.
+coupMauvais([A, B, C, 0]):-
+	A #\= 0,
+	B #\= 0,
+	C #\= 0,
+	diffType([A, B, C]).
 
 	% Ligne
 coupMauvais([A1, B1, C1, D1, _, _, _, _, _, _, _, _, _, _, _, _]):-coupMauvais([A1, B1, C1, D1]).
@@ -136,10 +198,11 @@ coupMauvais([_, _, C1, D1, _, _, C2, D2, _, _, _, _, _, _, _, _]):-coupMauvais([
 coupMauvais([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):-coupMauvais([C3, D3, C4, D4]).
 
 :- begin_tests(test_coupMauvais).
-	test("test_coupMauvais_true", [nondet,true]):-
-		coupMauvais([0, -2, 3, -4]), coupMauvais([1, 2, 0, 4]), coupMauvais([-4, 0, -1, -3]).
+	test("test_coupMauvais_true", [nondet,true]):-coupMauvais([0, -2, 3, -4]).
+	test("test_coupMauvais_true2", [nondet,true]):-coupMauvais([1, 2, 0, 4]).
+	test("test_coupMauvais_true3", [nondet,true]):-coupMauvais([-4, 0, -1, -3]).
 	test("test_coupMauvais_true_grille",[nondet,true]):-coupMauvais([0, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).
-	test("test_coupMauvais_fail", fail):-coupMauvais([0, 0, 2, 1]).
+	test("test_coupMauvais_fail", fail):-coupMauvais([0, 0, 0, 0]).
 	test("test_coupMauvais_false_grille", fail):-coupMauvais([1, 1, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).
 	test("test_coupMauvais_ouOfBounds", fail):-coupMauvais([-5, 2, 1, 5]).
 :- end_tests(test_coupMauvais).	
@@ -170,7 +233,8 @@ verifPosInterditeColonne(NewPos, PosChiffre, Grille):-
 
 :- begin_tests(test_posLigne_posColonne).
 	test("test_posLigne_true", true):-
-		verifPosInterditeLigne(10, 2, [0, 0, 0, 0, 0, 0, 0, 0, 4, 3, 2, 1, 0, 0, 0, 0]),
+		verifPosInterditeLigne(10, 2, [0, 0, 0, 0, 0, 0, 0, 0, 4, 3, 2, 1, 0, 0, 0, 0]).
+	test("test_posLigne_true2", true):-
 		verifPosInterditeLigne(7, 3, [0, 0, 0, 0, 1, -2, 3, -4, 0, 0, 0, 0, 0, 0, 0, 0]).
 	test("test_posLigne_fail", fail):-verifPosInterditeLigne(7, 3, [0, 0, 0, 0, -1, 2, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0]).
 
@@ -206,23 +270,24 @@ verifPosInterditeCarre(NewPos, Grille):-
 	nth1(Case, Grille, A),
 	Case1 is Case+1,
 	nth1(Case1, Grille, B),
-	Case2 is Case1+4,
+	Case2 is Case+4,
 	nth1(Case2, Grille, C),
-	Case3 is Case2+5,
+	Case3 is Case+5,
 	nth1(Case3, Grille, D),
 	diffType([A, B, C, D]).
 
 :- begin_tests(test_posCarre).
-	test("test_posCarre_zero", true):-verifPosInterditeCarre(7, [0, 0, 0, 0,
-									 0, 0, 1, 0, 
+	test("test_posCarre_zero", [nondet,true]):-
+		verifPosInterditeCarre(7, [ 0, 0, 0, 0,
+									0, 0, 1, 0, 
 									0, 0, 0, 0,
 									0, 0, 0, 0]).
 	test("test_posCarre_true", [nondet,true]):-
 		verifPosInterditeCarre(10, 	[0, 0, 0, 0,
 									 0, 0, 0, 0, 
 									 1, 2, 0, 0,
-									 4, 3, 0, 0]),
-		verifPosInterditeCarre(7, [0, 0, -2, -1, 0, 0, -4, -3, 0, 0, 0, 0, 0, 0, 0, 0]).
+									 4, 3, 0, 0]).
+	test("test_posCarre_true2", [nondet, true]):-verifPosInterditeCarre(7, [0, 0, -2, -1, 0, 0, -4, -3, 0, 0, 0, 0, 0, 0, 0, 0]).
 	test("test_posCarre_fail", fail):-verifPosInterditeCarre(7, [0, 0, -1, 2, 0, 0, -3, 1, 0, 0, 0, 0, 0, 0, 0, 0]).
 :- end_tests(test_posCarre).	
 
@@ -237,8 +302,8 @@ verifPosInterdite(PosLettre, PosChiffre, Grille):-
 		verifPosInterdite(2, 2, [3, -4, 0, 0,
 								 2, 1, 0, 0,
 								 0, 0, 0, 4, 
-								 0, 3, 0, 0]),
-		verifPosInterdite(3, 2, [0, 0, 1, 4,
+								 0, 3, 0, 0]).
+	test("test_posInterdite_true2", [nondet,true]):-verifPosInterdite(3, 2, [0, 0, 1, 4,
 								 0, 0, 2, -3, 
 								 0, 0, 0, 0,	
 								 0, 0, 4, 0]).
@@ -249,21 +314,21 @@ verifPosInterdite(PosLettre, PosChiffre, Grille):-
 % On place maintenant les pièces sur la grille de jeu
 
 placerPiece(X, PosLettre, PosChiffre, Grille, NewGrille):-
-	X #\= 0,
 	verifPiece(X),
 	verifPos(PosLettre),
 	verifPos(PosChiffre),
 	NewPos is PosLettre + (PosChiffre-1)*4,
 	verifPosInterdite(PosLettre, PosChiffre, Grille),
 	nth1(NewPos, Grille, 0),
-	nth1(NewPos, NewGrille, X, Grille).
+	nth1(NewPos, Poubelle, X, Grille),
+	Del_Elem is NewPos + 1,
+	nth1(Del_Elem, Poubelle, _, NewGrille).
 
 :- begin_tests(test_placerPiece).
-	test("test_diffType_true", true):-diffType([1, -2, 3, 4]).
-	test("test_diffType_fail", fail):-diffType([0, 1, -1]).
-	test("test_diffType_outOfBounds", fail):-diffType([-5, 0, 2, 1]).
+	test("test_placerPiece_true", [set(NewGrille == [[2, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0, 4, 4]])]):-placerPiece(2, 1, 1, [0, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0, 4, 4], NewGrille).
+	test("test_placerPiece_failPiece", fail):-placerPiece(0, 3, 2, [0, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0, 4, 4], _).
+	test("test_placerPiece_failPos", fail):-placerPiece(1, 5, 2, [2, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0, 4, 4], _).
 :- end_tests(test_placerPiece).	
 
 % Continuer 1, Gagner 2, Nul 3, Perdu 4
 
-%Ne pas oublier de faire une liste de pieces
