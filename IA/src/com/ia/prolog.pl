@@ -22,7 +22,7 @@ verifPos(Position):-
 % Dans le quaduplet on ne doit pas avoir un pion ennemi du meme type
 
 interdiction(_, []):-!.
-%interdiction(0, _):-!.
+interdiction(_, [0|L]):-.
 interdiction(A, [B|C]):-
 	A #\= -B,
 	interdiction(A, C).
@@ -79,22 +79,22 @@ coupGagnant([A, B, C, D]):-
 	diffType([A, B, C, D]).
 	
 	% Ligne
-coupGagnant([A1, B1, C1, D1, _, _, _, _, _, _, _, _, _, _, _, _]):- coupGagnant([A1, B1, C1, D1]).
-coupGagnant([_, _, _, _, A2, B2, C2, D2, _, _, _, _, _, _, _, _]):- coupGagnant([A2, B2, C2, D2]).
-coupGagnant([_, _, _, _, _, _, _, _, A3, B3, C3, D3, _, _, _, _]):- coupGagnant([A3, B3, C3, D3]).
-coupGagnant([_, _, _, _, _, _, _, _, _, _, _, _, A4, B4, C4, D4]):- coupGagnant([A4, B4, C4, D4]).
+coupGagnant([A1, B1, C1, D1, _, _, _, _, _, _, _, _, _, _, _, _]):-coupGagnant([A1, B1, C1, D1]).
+coupGagnant([_, _, _, _, A2, B2, C2, D2, _, _, _, _, _, _, _, _]):-coupGagnant([A2, B2, C2, D2]).
+coupGagnant([_, _, _, _, _, _, _, _, A3, B3, C3, D3, _, _, _, _]):-coupGagnant([A3, B3, C3, D3]).
+coupGagnant([_, _, _, _, _, _, _, _, _, _, _, _, A4, B4, C4, D4]):-coupGagnant([A4, B4, C4, D4]).
 
 	% Colonne
-coupGagnant([A1, _, _, _, A2, _, _, _, A3, _, _, _, A4, _, _, _]):- coupGagnant([A1, A2, A3, A4]).
-coupGagnant([_, B1, _, _, _, B2, _, _, _, B3, _, _, _, B4, _, _]):- coupGagnant([B1, B2, B3, B4]).
-coupGagnant([_, _, C1, _, _, _, C2, _, _, _, C3, _, _, _, C4, _]):- coupGagnant([C1, C2, C3, C4]).
-coupGagnant([_, _, _, D1, _, _, _, D2, _, _, _, D3, _, _, _, D4]):- coupGagnant([D1, D2, D3, D4]).
+coupGagnant([A1, _, _, _, A2, _, _, _, A3, _, _, _, A4, _, _, _]):-coupGagnant([A1, A2, A3, A4]).
+coupGagnant([_, B1, _, _, _, B2, _, _, _, B3, _, _, _, B4, _, _]):-coupGagnant([B1, B2, B3, B4]).
+coupGagnant([_, _, C1, _, _, _, C2, _, _, _, C3, _, _, _, C4, _]):-coupGagnant([C1, C2, C3, C4]).
+coupGagnant([_, _, _, D1, _, _, _, D2, _, _, _, D3, _, _, _, D4]):-coupGagnant([D1, D2, D3, D4]).
 
 	% Carré
-coupGagnant([A1, B1, _, _, A2, B2, _, _, _, _, _, _, _, _, _, _]):- coupGagnant([A1, B1, A2, B2]).
-coupGagnant([_, _, _, _, _, _, _, _, A3, B3, _, _, A4, B4, _, _]):- coupGagnant([A3, B3, A4, B4]).
-coupGagnant([_, _, C1, D1, _, _, C2, D2, _, _, _, _, _, _, _, _]):- coupGagnant([C1, D1, C2, D2]).
-coupGagnant([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):- coupGagnant([C3, D3, C4, D4]).
+coupGagnant([A1, B1, _, _, A2, B2, _, _, _, _, _, _, _, _, _, _]):-coupGagnant([A1, B1, A2, B2]).
+coupGagnant([_, _, _, _, _, _, _, _, A3, B3, _, _, A4, B4, _, _]):-coupGagnant([A3, B3, A4, B4]).
+coupGagnant([_, _, C1, D1, _, _, C2, D2, _, _, _, _, _, _, _, _]):-coupGagnant([C1, D1, C2, D2]).
+coupGagnant([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):-coupGagnant([C3, D3, C4, D4]).
 
 
 :- begin_tests(test_coupGagnant).
@@ -112,28 +112,28 @@ coupGagnant([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):- coupGagnant(
 % On va considérer ça comme un coup mauvais
 % Dans le cas où notre pion serait posé
 
-coupMauvais([0, B, C, D]):- diffType([0, B, C, D]).
-coupMauvais([A, 0, C, D]):- diffType([A, 0, C, D]).
-coupMauvais([A, B, 0, D]):- diffType([A, B, 0, D]).
-coupMauvais([A, B, C, 0]):- diffType([A, B, C, 0]).
+coupMauvais([0, B, C, D]):-diffType([0, B, C, D]).
+coupMauvais([A, 0, C, D]):-diffType([A, 0, C, D]).
+coupMauvais([A, B, 0, D]):-diffType([A, B, 0, D]).
+coupMauvais([A, B, C, 0]):-diffType([A, B, C, 0]).
 
 	% Ligne
-coupMauvais([A1, B1, C1, D1, _, _, _, _, _, _, _, _, _, _, _, _]):- coupMauvais([A1, B1, C1, D1]).
-coupMauvais([_, _, _, _, A2, B2, C2, D2, _, _, _, _, _, _, _, _]):- coupMauvais([A2, B2, C2, D2]).
-coupMauvais([_, _, _, _, _, _, _, _, A3, B3, C3, D3, _, _, _, _]):- coupMauvais([A3, B3, C3, D3]).
-coupMauvais([_, _, _, _, _, _, _, _, _, _, _, _, A4, B4, C4, D4]):- coupMauvais([A4, B4, C4, D4]).
+coupMauvais([A1, B1, C1, D1, _, _, _, _, _, _, _, _, _, _, _, _]):-coupMauvais([A1, B1, C1, D1]).
+coupMauvais([_, _, _, _, A2, B2, C2, D2, _, _, _, _, _, _, _, _]):-coupMauvais([A2, B2, C2, D2]).
+coupMauvais([_, _, _, _, _, _, _, _, A3, B3, C3, D3, _, _, _, _]):-coupMauvais([A3, B3, C3, D3]).
+coupMauvais([_, _, _, _, _, _, _, _, _, _, _, _, A4, B4, C4, D4]):-coupMauvais([A4, B4, C4, D4]).
 
 	% Colonne
-coupMauvais([A1, _, _, _, A2, _, _, _, A3, _, _, _, A4, _, _, _]):- coupMauvais([A1, A2, A3, A4]).
-coupMauvais([_, B1, _, _, _, B2, _, _, _, B3, _, _, _, B4, _, _]):- coupMauvais([B1, B2, B3, B4]).
-coupMauvais([_, _, C1, _, _, _, C2, _, _, _, C3, _, _, _, C4, _]):- coupMauvais([C1, C2, C3, C4]).
-coupMauvais([_, _, _, D1, _, _, _, D2, _, _, _, D3, _, _, _, D4]):- coupMauvais([D1, D2, D3, D4]).
+coupMauvais([A1, _, _, _, A2, _, _, _, A3, _, _, _, A4, _, _, _]):-coupMauvais([A1, A2, A3, A4]).
+coupMauvais([_, B1, _, _, _, B2, _, _, _, B3, _, _, _, B4, _, _]):-coupMauvais([B1, B2, B3, B4]).
+coupMauvais([_, _, C1, _, _, _, C2, _, _, _, C3, _, _, _, C4, _]):-coupMauvais([C1, C2, C3, C4]).
+coupMauvais([_, _, _, D1, _, _, _, D2, _, _, _, D3, _, _, _, D4]):-coupMauvais([D1, D2, D3, D4]).
 
 	% Carré
-coupMauvais([A1, B1, _, _, A2, B2, _, _, _, _, _, _, _, _, _, _]):- coupMauvais([A1, B1, A2, B2]).
-coupMauvais([_, _, _, _, _, _, _, _, A3, B3, _, _, A4, B4, _, _]):- coupMauvais([A3, B3, A4, B4]).
-coupMauvais([_, _, C1, D1, _, _, C2, D2, _, _, _, _, _, _, _, _]):- coupMauvais([C1, D1, C2, D2]).
-coupMauvais([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):- coupMauvais([C3, D3, C4, D4]).
+coupMauvais([A1, B1, _, _, A2, B2, _, _, _, _, _, _, _, _, _, _]):-coupMauvais([A1, B1, A2, B2]).
+coupMauvais([_, _, _, _, _, _, _, _, A3, B3, _, _, A4, B4, _, _]):-coupMauvais([A3, B3, A4, B4]).
+coupMauvais([_, _, C1, D1, _, _, C2, D2, _, _, _, _, _, _, _, _]):-coupMauvais([C1, D1, C2, D2]).
+coupMauvais([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):-coupMauvais([C3, D3, C4, D4]).
 
 :- begin_tests(test_coupMauvais).
 	test("test_coupMauvais_true", [nondet,true]):-
@@ -144,7 +144,7 @@ coupMauvais([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):- coupMauvais(
 	test("test_coupMauvais_ouOfBounds", fail):-coupMauvais([-5, 2, 1, 5]).
 :- end_tests(test_coupMauvais).	
 
-% Verification des coups impossible à partir des pièces deja presentes sur la grille
+% Verification des coups impossible à partir des pièces deja presentes sur la grille, en fonction des lignes, des colonnes, et des carrés
 
 verifPosInterditeLigne(NewPos, PosLettre, Grille):-
 	Case is NewPos - (PosLettre-1),
@@ -191,13 +191,40 @@ isCarre4(X):-
 findCarre(X,Res):-
     isCarre1(X)-> Res = 1; isCarre2(X) -> Res = 3 ; isCarre3(X) -> Res = 9 ; isCarre4(X) -> Res = 11.
 
+:- begin_tests(test_findCarre).
+	test("test_findCarre_true", [set(Res == [1])]):-findCarre(5, Res).
+	test("test_findCarre_true2", [set(Res == [9])]):-findCarre(10, Res).
+	test("test_findCarre_true3", [set(Res == [11])]):-findCarre(15, Res).
+	test("test_findCarre_true4", [set(Res == [3])]):-findCarre(3, Res).
+	test("test_findCarre_fail", [set(Res == [])]):-findCarre(17, Res).
+	test("test_findCarre_zero", [set(Res == [])]):-findCarre(0, Res).
+	test("test_findCarre_negative", [set(Res == [])]):-findCarre(-1, Res).
+:- end_tests(test_findCarre).
+
 verifPosInterditeCarre(NewPos, Grille):-
 	findCarre(NewPos, Case),
 	nth1(Case, Grille, A),
-	nth1(Case+1, Grille, B),
-	nth1(Case+4, Grille, C),
-	nth1(Case+5, Grille, D),
+	Case1 is Case+1,
+	nth1(Case1, Grille, B),
+	Case2 is Case1+4,
+	nth1(Case2, Grille, C),
+	Case3 is Case2+5,
+	nth1(Case3, Grille, D),
 	diffType([A, B, C, D]).
+
+:- begin_tests(test_posCarre).
+	test("test_posCarre_zero", true):-verifPosInterditeCarre(7, [0, 0, 0, 0,
+									 0, 0, 1, 0, 
+									0, 0, 0, 0,
+									0, 0, 0, 0]).
+	test("test_posCarre_true", [nondet,true]):-
+		verifPosInterditeCarre(10, 	[0, 0, 0, 0,
+									 0, 0, 0, 0, 
+									 1, 2, 0, 0,
+									 4, 3, 0, 0]),
+		verifPosInterditeCarre(7, [0, 0, -2, -1, 0, 0, -4, -3, 0, 0, 0, 0, 0, 0, 0, 0]).
+	test("test_posCarre_fail", fail):-verifPosInterditeCarre(7, [0, 0, -1, 2, 0, 0, -3, 1, 0, 0, 0, 0, 0, 0, 0, 0]).
+:- end_tests(test_posCarre).	
 
 verifPosInterdite(PosLettre, PosChiffre, Grille):-
 	NewPos is PosLettre + (PosChiffre-1)*4,
@@ -205,6 +232,19 @@ verifPosInterdite(PosLettre, PosChiffre, Grille):-
 	verifPosInterditeColonne(NewPos, PosChiffre, Grille),
 	verifPosInterditeCarre(NewPos, Grille).
 
+:- begin_tests(test_posInterdite).
+	test("test_posInterdite_true", [nondet,true]):-
+		verifPosInterdite(2, 2, [3, -4, 0, 0,
+								 2, 1, 0, 0,
+								 0, 0, 0, 4, 
+								 0, 3, 0, 0]),
+		verifPosInterdite(3, 2, [0, 0, 1, 4,
+								 0, 0, 2, -3, 
+								 0, 0, 0, 0,	
+								 0, 0, 4, 0]).
+	test("test_posInterdite_outOfBounds", fail):-verifPosInterdite(4, 5, [0, 0, 1, 2, 0, 0, -3, 1, 0, 0, 2, 3, 4, 0, 0, 0]).
+	test("test_posInterdite_outOfBounds_grille", fail):-verifPosInterdite(4, 4, [0, 0, 1, 2, 0, 0, -3, 1, 0, -10, 2, 3, 6, 0, 0, 1]).
+:- end_tests(test_posInterdite).
 
 % On place maintenant les pièces sur la grille de jeu
 
@@ -217,6 +257,12 @@ placerPiece(X, PosLettre, PosChiffre, Grille, NewGrille):-
 	verifPosInterdite(PosLettre, PosChiffre, Grille),
 	nth1(NewPos, Grille, 0),
 	nth1(NewPos, NewGrille, X, Grille).
+
+:- begin_tests(test_placerPiece).
+	test("test_diffType_true", true):-diffType([1, -2, 3, 4]).
+	test("test_diffType_fail", fail):-diffType([0, 1, -1]).
+	test("test_diffType_outOfBounds", fail):-diffType([-5, 0, 2, 1]).
+:- end_tests(test_placerPiece).	
 
 % Continuer 1, Gagner 2, Nul 3, Perdu 4
 
