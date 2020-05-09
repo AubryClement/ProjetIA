@@ -135,29 +135,14 @@ diffTypeAll([X|L]):-
 	test("test_diffTypeAll_vide", true):-diffTypeAll([]).
 :- end_tests(test_diffTypeAll).	
 
-% Vérification de la grille, par ligne, colonne, et carré
-
-%verificationGrille([A1, B1, C1, D1, A2, B2, C2, D2, A3, B3, C3, D3, A4, B4, C4, D4]):-
-	
-%	diffType([A1, B1, C1, D1]),
-%	diffType([A2, B2, C2, D2]),
-%	diffType([A3, B3, C3, D3]),
-%	diffType([A4, B4, C4, D4]),
-
-%	diffType([A1, A2, A3, A4]),
-%	diffType([B1, B2, B3, B4]),
-%	diffType([C1, C2, C3, C4]),
-%	diffType([D1, D2, C3, D4]),
-
-%	diffType([A1, B1, A2, B2]),
-%	diffType([A3, B3, A4, B4]),
-%	diffType([C1, D1, C2, D2]),
-%	diffType([C3, D3, C4, D4]).
-
 % On vérifie maintenant chaque cas où l'on peut gagner, quand toutes les pieces sont placées et de types différents
 
-recupLigne(Pos, Grille, Res):-
+isPos(Pos, Case, VarPos, Var, Res):-
+	Case == Pos -> Res = VarPos; Res = Var.
+
+recupLigne(X, Pos, Grille, Res):-
 	findChiffre(Pos, PosChiffre),
+	
 	Case is (PosChiffre-1)*4 + 1,
 	nth1(Case, Grille, A),
 	Case1 is Case+1,
@@ -166,10 +151,16 @@ recupLigne(Pos, Grille, Res):-
 	nth1(Case2, Grille, C),
 	Case3 is Case2+1,
 	nth1(Case3, Grille, D),
-	Res = [A, B, C, D].
+	
+	isPos(Pos, Case, X, A, A1),
+	isPos(Pos, Case1, X, B, B1),
+	isPos(Pos, Case2, X, C, C1),
+	isPos(Pos, Case3, X, D, D1),
+	Res = [A1, B1, C1, D1].
 
-recupColonne(Pos, Grille, Res):-
+recupColonne(X, Pos, Grille, Res):-
 	findLettre(Pos, Case),
+	
 	nth1(Case, Grille, A),
 	Case1 is Case+4,
 	nth1(Case1, Grille, B),
@@ -177,10 +168,16 @@ recupColonne(Pos, Grille, Res):-
 	nth1(Case2, Grille, C),
 	Case3 is Case2+4,
 	nth1(Case3, Grille, D),
-	Res = [A, B, C, D].
+	
+	isPos(Pos, Case, X, A, A1),
+	isPos(Pos, Case1, X, B, B1),
+	isPos(Pos, Case2, X, C, C1),
+	isPos(Pos, Case3, X, D, D1),
+	Res = [A1, B1, C1, D1].
 
-recupCarre(Pos, Grille, Res):-
+recupCarre(X, Pos, Grille, Res):-
 	findCarre(Pos, Case),
+	
 	nth1(Case, Grille, A),
 	Case1 is Case+1,
 	nth1(Case1, Grille, B),
@@ -188,31 +185,37 @@ recupCarre(Pos, Grille, Res):-
 	nth1(Case2, Grille, C),
 	Case3 is Case+5,
 	nth1(Case3, Grille, D),
-	Res = [A, B, C, D].	
+	
+	isPos(Pos, Case, X, A, A1),
+	isPos(Pos, Case1, X, B, B1),
+	isPos(Pos, Case2, X, C, C1),
+	isPos(Pos, Case3, X, D, D1),
+	Res = [A1, B1, C1, D1].
 
 coupGagnant([A, B, C, D]):-
+	writeln([A, B, C, D]),
 	A #\= 0,
 	B #\= 0,
 	C #\= 0,
 	D #\= 0,
 	diffTypeAll([A, B, C, D]).
 
-verifGagneLigne(Pos, Grille):-
-	recupLigne(Pos, Grille, Ligne),
+verifGagneLigne(X, Pos, Grille):-
+	recupLigne(X, Pos, Grille, Ligne),
 	coupGagnant(Ligne).
 
-verifGagneColonne(Pos, Grille):-
-	recupColonne(Pos, Grille, Colonne),
+verifGagneColonne(X, Pos, Grille):-
+	recupColonne(X, Pos, Grille, Colonne),
 	coupGagnant(Colonne).
 
-verifGagneCarre(Pos, Grille):-
-	recupCarre(Pos,Grille, Carre),
+verifGagneCarre(X, Pos, Grille):-
+	recupCarre(X, Pos, Grille, Carre),
 	coupGagnant(Carre).
 
-coupGagnant(Pos, Grille):-
-	verifGagneLigne(Pos, Grille)
-	;verifGagneColonne(Pos, Grille)
-	;verifGagneCarre(Pos, Grille).
+coupGagnant(X, Pos, Grille):-
+	verifGagneLigne(X, Pos, Grille)
+	;verifGagneColonne(X, Pos, Grille)
+	;verifGagneCarre(X, Pos, Grille).
 
 
 :- begin_tests(test_coupGagnant).
@@ -225,8 +228,8 @@ coupGagnant(Pos, Grille):-
 :- end_tests(test_coupGagnant).	
 
 :- begin_tests(test_coupGagnantGrille).
-	test("test_coupGagnant_true", [nondet, true]):-coupGagnant(7, [0, 0, 0, 0, 3, 4, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0]).	
-	test("test_coupGagnant_fail", fail):-coupGagnant(7, [0, 0, 0, 0, 0, 4, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0]).	
+	test("test_coupGagnant_true", [nondet, true]):-coupGagnant(1, 7, [0, 0, 0, 0, 3, 4, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0]).	
+	test("test_coupGagnant_fail", fail):-coupGagnant(1, 7, [0, 0, 0, 0, 0, 4, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0]).	
 :- end_tests(test_coupGagnantGrille).	
 
 
@@ -255,133 +258,182 @@ coupMauvais([A, B, C, 0]):-
 	C #\= 0,
 	diffType([A, B, C]).
 
-	% Ligne
-coupMauvais([A1, B1, C1, D1, _, _, _, _, _, _, _, _, _, _, _, _]):-coupMauvais([A1, B1, C1, D1]).
-coupMauvais([_, _, _, _, A2, B2, C2, D2, _, _, _, _, _, _, _, _]):-coupMauvais([A2, B2, C2, D2]).
-coupMauvais([_, _, _, _, _, _, _, _, A3, B3, C3, D3, _, _, _, _]):-coupMauvais([A3, B3, C3, D3]).
-coupMauvais([_, _, _, _, _, _, _, _, _, _, _, _, A4, B4, C4, D4]):-coupMauvais([A4, B4, C4, D4]).
+verifMauvaisLigne(X, Pos, Grille):-
+	recupLigne(X, Pos, Grille, Ligne),
+	coupMauvais(Ligne).
 
-	% Colonne
-coupMauvais([A1, _, _, _, A2, _, _, _, A3, _, _, _, A4, _, _, _]):-coupMauvais([A1, A2, A3, A4]).
-coupMauvais([_, B1, _, _, _, B2, _, _, _, B3, _, _, _, B4, _, _]):-coupMauvais([B1, B2, B3, B4]).
-coupMauvais([_, _, C1, _, _, _, C2, _, _, _, C3, _, _, _, C4, _]):-coupMauvais([C1, C2, C3, C4]).
-coupMauvais([_, _, _, D1, _, _, _, D2, _, _, _, D3, _, _, _, D4]):-coupMauvais([D1, D2, D3, D4]).
+verifMauvaisColonne(X, Pos, Grille):-
+	recupColonne(X, Pos, Grille, Colonne),
+	coupMauvais(Colonne).
 
-	% Carré
-coupMauvais([A1, B1, _, _, A2, B2, _, _, _, _, _, _, _, _, _, _]):-coupMauvais([A1, B1, A2, B2]).
-coupMauvais([_, _, _, _, _, _, _, _, A3, B3, _, _, A4, B4, _, _]):-coupMauvais([A3, B3, A4, B4]).
-coupMauvais([_, _, C1, D1, _, _, C2, D2, _, _, _, _, _, _, _, _]):-coupMauvais([C1, D1, C2, D2]).
-coupMauvais([_, _, _, _, _, _, _, _, _, _, C3, D3, _, _, C4, D4]):-coupMauvais([C3, D3, C4, D4]).
+verifMauvaisCarre(X, Pos, Grille):-
+	recupCarre(X, Pos,Grille, Carre),
+	coupMauvais(Carre).
+
+coupMauvais(X, Pos, Grille):-
+	verifMauvaisLigne(X, Pos, Grille)
+	;verifMauvaisColonne(X, Pos, Grille)
+	;verifMauvaisCarre(X, Pos, Grille).
 
 :- begin_tests(test_coupMauvais).
 	test("test_coupMauvais_true", [nondet,true]):-coupMauvais([0, -2, 3, -4]).
 	test("test_coupMauvais_true2", [nondet,true]):-coupMauvais([1, 2, 0, 4]).
 	test("test_coupMauvais_true3", [nondet,true]):-coupMauvais([-4, 0, -1, -3]).
-	test("test_coupMauvais_true_grille",[nondet,true]):-coupMauvais([0, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).
 	test("test_coupMauvais_fail", fail):-coupMauvais([0, 0, 0, 0]).
-	test("test_coupMauvais_false_grille", fail):-coupMauvais([1, 1, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).
 	test("test_coupMauvais_ouOfBounds", fail):-coupMauvais([-5, 2, 1, 5]).
 :- end_tests(test_coupMauvais).	
 
+:- begin_tests(test_coupMauvaisGrille).
+	test("test_coupMauvais_true_grille",[nondet,true]):-coupMauvais(2, 2, [0, 0, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).
+	test("test_coupMauvais_false_grille", fail):-coupMauvais(1, 1, [0, 1, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).
+:- end_tests(test_coupMauvaisGrille).	
+
 % Verification des coups impossible à partir des pièces deja presentes sur la grille, en fonction des lignes, des colonnes, et des carrés
 
-verifPosInterditeLigne(NewPos, Grille):-
-	recupLigne(NewPos, Grille, Ligne),
+verifPosInterditeLigne(X, NewPos, Grille):-
+	recupLigne(X, NewPos, Grille, Ligne),
 	diffType(Ligne).
 
-verifPosInterditeColonne(NewPos, Grille):-
-	recupColonne(NewPos, Grille, Colonne),
+verifPosInterditeColonne(X, NewPos, Grille):-
+	recupColonne(X, NewPos, Grille, Colonne),
 	diffType(Colonne).
 
-verifPosInterditeCarre(NewPos, Grille):-
-	recupCarre(NewPos, Grille, Carre),
+verifPosInterditeCarre(X, NewPos, Grille):-
+	recupCarre(X, NewPos, Grille, Carre),
 	diffType(Carre).
 
 
 :- begin_tests(test_posLigne).
 	test("test_posLigne_true", true):-
-		verifPosInterditeLigne(10, [0, 0, 0, 0, 0, 0, 0, 0, 4, 3, 2, 1, 0, 0, 0, 0]).
+		verifPosInterditeLigne(3, 10, [0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 2, 1, 0, 0, 0, 0]).
 	test("test_posLigne_true2", true):-
-		verifPosInterditeLigne(7, [0, 0, 0, 0, 1, -2, 3, -4, 0, 0, 0, 0, 0, 0, 0, 0]).
-	test("test_posLigne_fail", fail):-verifPosInterditeLigne(7, [0, 0, 0, 0, -1, 2, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0]).
+		verifPosInterditeLigne(3, 7, [0, 0, 0, 0, 1, -2, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0]).
+	test("test_posLigne_fail", fail):-verifPosInterditeLigne(1, 7, [0, 0, 0, 0, -1, 2, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0]).
 :- end_tests(test_posLigne).
 
 :- begin_tests(test_posColonne).
 	test("test_posColonne_true", true):-
-		verifPosInterditeColonne(10, [0, 4, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0]).
+		verifPosInterditeColonne(2, 10, [0, 4, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]).
 	test("test_posColonne_true2", true):-
-		verifPosInterditeColonne(7, [0, 0, 1, 0, 0, 0, -2, 0, 0, 0, 3, 0, 0, 0, -4, 0]).
-	test("test_posColonne_fail", fail):-verifPosInterditeColonne(3, [0, 0, -1, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 3, 0]).
+		verifPosInterditeColonne(-2, 7, [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, -4, 0]).
+	test("test_posColonne_fail", fail):-verifPosInterditeColonne(-1, 3, [0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 3, 0]).
 :- end_tests(test_posColonne).
 
 :- begin_tests(test_posCarre).
 	test("test_posCarre_zero", [nondet,true]):-
-		verifPosInterditeCarre(7, [ 0, 0, 0, 0,
+		verifPosInterditeCarre(1, 7, [ 0, 0, 0, 0,
 									0, 0, 0, 0, 
 									0, 0, 0, 0,
 									0, 0, 0, 0]).
 	test("test_posCarre_true", [nondet,true]):-
-		verifPosInterditeCarre(10, [0, 0, 0, 0,
+		verifPosInterditeCarre(2, 10, [0, 0, 0, 0,
 									 0, 0, 0, 0, 
-									 1, 2, 0, 0,
+									 1, 0, 0, 0,
 									 4, 3, 0, 0]).
-	test("test_posCarre_true2", [nondet, true]):-verifPosInterditeCarre(7, [0, 0, -2, -1, 0, 0, -4, -3, 0, 0, 0, 0, 0, 0, 0, 0]).
-	test("test_posCarre_fail", fail):-verifPosInterditeCarre(7, [0, 0, -1, 2, 0, 0, -3, 1, 0, 0, 0, 0, 0, 0, 0, 0]).
+	test("test_posCarre_true2", [nondet, true]):-verifPosInterditeCarre(-4, 7, [0, 0, -2, -1, 0, 0, 0, -3, 0, 0, 0, 0, 0, 0, 0, 0]).
+	test("test_posCarre_fail", fail):-verifPosInterditeCarre(-3, 7, [0, 0, -1, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]).
 :- end_tests(test_posCarre).	
 
-verifPosInterdite(Pos, Grille):-
-	verifPosInterditeLigne(Pos, Grille),
-	verifPosInterditeColonne(Pos, Grille),
-	verifPosInterditeCarre(Pos, Grille).
+verifPosInterdite(X, Pos, Grille):-
+	verifPosInterditeLigne(X, Pos, Grille),
+	verifPosInterditeColonne(X, Pos, Grille),
+	verifPosInterditeCarre(X, Pos, Grille).
 
 :- begin_tests(test_posInterdite).
 	test("test_posInterdite_true", [nondet,true]):-
-		verifPosInterdite(2, [3, -4, 0, 0,
+		verifPosInterdite(-4, 2, [3, 0, 0, 0,
 							  2, 1, 0, 0,
 							  0, 0, 0, 4, 
 							  0, 3, 0, 0]).
-	test("test_posInterdite_true2", [nondet,true]):-verifPosInterdite(1, [0, 0, 1, 4,
+	test("test_posInterdite_true2", [nondet,true]):-verifPosInterdite(1, 1, [0, 0, 1, 4,
 																		  0, 0, 3, -3, 
 																		  0, 0, 0, 0,	
 																		  0, 0, 4, 0]).
-	test("test_posInterdite_outOfBounds", fail):-verifPosInterdite(17, [0, 0, 1, 2, 0, 0, -3, 1, 0, 0, 2, 3, 4, 0, 0, 0]).
+	test("test_posInterdite_outOfBounds", fail):-verifPosInterdite(4, 17, [0, 0, 1, 2, 0, 0, -3, 1, 0, 0, 2, 3, 4, 0, 0, 0]).
 :- end_tests(test_posInterdite).
 
 % On place maintenant les pièces sur la grille de jeu
 
-placerPiece(X, Pos, Grille, NewGrille):-
+placerPiece(X, Pos, Grille):-
 	verifPiece(X),
 	findLettre(Pos, PosLettre),
 	findChiffre(Pos, PosChiffre),
 	verifPos(PosLettre),
 	verifPos(PosChiffre),
-	verifPosInterdite(Pos, Grille),
-	nth1(Pos, Grille, 0),
-	nth1(Pos, Poubelle, X, Grille),
-	Del_Elem is Pos + 1,
-	nth1(Del_Elem, Poubelle, _, NewGrille).
+	verifPosInterdite(X, Pos, Grille),
+	nth1(Pos, Grille, 0).
 
 :- begin_tests(test_placerPiece).
-	test("test_placerPiece_true", [set(NewGrille == [[3, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 4, 4]])]):-
+	test("test_placerPiece_true", [nondet,true]):-
 		placerPiece(3, 1, [ 0, 0, 1, 0,
 							0, 0, 0, 2,
 							0, 0, 0, 0,
-							0, 0, 4, 4], NewGrille).
-	test("test_placerPiece_failPiece", [set(NewGrille == [])]):-placerPiece(0, 7, [0, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0, 4, 4], NewGrille).
-	test("test_placerPiece_failPos", [set(NewGrille == [])]):-placerPiece(1, 1, [2, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0, 4, 4], NewGrille).
+							0, 0, 4, 4]).
+	test("test_placerPiece_failPiece", fail):-placerPiece(0, 7, [0, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0, 4, 4]).
+	test("test_placerPiece_failPos", fail):-placerPiece(1, 1, [2, 0, 1, 1, 0, 0, 2, 2, 0, 0, 3, 3, 0, 0, 4, 4]).
 :- end_tests(test_placerPiece).	
 
-% Continuer 1, Gagner 2, Nul 3, Perdu 4
 
-quantik(17, Grille, PiecesDispo, PiecesDispo):-!.
-quantik(Case, Grille, [], PiecesDispo):-
+
+
+% Main
+
+quantik(PiecesDispo, Case, Grille, NewPiece, NewLettre, NewChiffre, TypeCoup):-
+	quantik(PiecesDispo, Case, Grille, PiecesDispo,  NewPiece, NewLettre, NewChiffre, TypeCoup).
+
+quantik(_Pieces, 17, _Grille, _PiecesDispo, _NewPiece, _NewLettre, _NewChiffre, _TypeCoup):-!.
+quantik([], Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup):-
 	NewCase is Case+1,
-	Pieces is PiecesDispo,
-	quantik(NewCase, Grille, Pieces, PiecesDispo).
-quantik(Case, Grille, [Piece|Pieces], PiecesDispo):-
-	placerPiece(Piece, Case, Grille, NewGrille) 
-		-> coupGagnant(Case, NewGrille) 
-		; quantik(Grille, PiecesDispo, PiecesDispo).
+	quantik(PiecesDispo, NewCase, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup).
+quantik([Piece|Pieces], Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup):- 
+	placerPiece(Piece, Case, Grille) 
+		-> quantikVerifCoupGagnant([Piece|Pieces], Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup) 
+		;quantik(Pieces, Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup) .
+
+% Si la piece correspond à un coup gagnant on envoie la reponse
+
+quantikVerifCoupGagnant([Piece|Pieces], Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup):-
+	coupGagnant(Piece, Case, Grille)
+		-> sendReponse(Piece, Case, 2)
+		; quantikVerifCoupMauvais([Piece|Pieces], Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup).
+
+%On retire tous les coups qui sont mauvais
+
+quantikVerifCoupMauvais([Piece|Pieces], Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup):-
+	\+ coupMauvais(Piece, Case, Grille)
+	-> addTableauPoids([Piece|Pieces], Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup)
+	 	;print("Coup mauvais sur la case "), 
+		print(Case),
+		print(" avec la piece "),
+		writeln(Piece),
+		quantik(Pieces, Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup).
+
+% On envoie la réponse avec le type de coup, avec comme référence le barème ci dessous
+% Continuer 1, Gagner 2, Perdu 4
+
+sendReponse(Piece, Case, _TypeCoup):-
+	print("Send Reponse sur la case "), 
+	print(Case),
+	writeln(" avec la piece "),
+	print(Piece),
+	findLettre(Case, _Lettre),
+	findChiffre(Case, _Chiffre).
+	%appeler quantik avec les param Lettre et Chiffre.
+
+% Tableau dans lequel tous les coups qui ne sont ni gagnants ni mauvais sont stockés 
+
+addTableauPoids([Piece|Pieces], Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup):-
+	print("Ajout Poids sur la case "), 
+	print(Case),
+	print(" avec la piece "),
+	writeln(Piece),
+	quantik(Pieces, Case, Grille, PiecesDispo, NewPiece, NewLettre, NewChiffre, TypeCoup).
+		
+
+maxList([],0):-!.
+maxList([X|L], Res):-
+	maxList(L, Var),
+	Res is max(Var, X).
 
 
 % Description algo (si fatigue)
@@ -392,4 +444,11 @@ quantik(Case, Grille, [Piece|Pieces], PiecesDispo):-
 %          Sinon
 %              Calcul des poids (à voir...) -> affecter un poids à une position X piece et placer ca dans un tableau
 %    
-% Une fois toutes les pieces effectuées sur toutes les cases, si pas de coupGagnant -> prendre Max du tableau des poids -> Si tableau vide prendre un coupMauvais (on s'en fou duquel)
+% Une fois toutes les pieces effectuées sur toutes les cases, si pas de coupGagnant -> prendre Max du tableau des poids -> Si tableau poids vide prendre un coupMauvais (on s'en fou duquel)
+
+% (1,[4, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 4], [1,2,3])
+%
+% 	[4, 0, 1, 0, 
+%	 0, 0, 0, 2,
+%	 0, 0, 0, 3,
+%	 0, 0, 0, 4]
